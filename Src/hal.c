@@ -47,13 +47,13 @@ typedef struct rect{ //definition d'une structure permettant de stocker un recta
     uint8_t xo,yo,width,height;
 }rect;
 
-#define WINDOW_WIDTH 40 //constantes
+#define WINDOW_WIDTH 42 //constantes
 #define WINDOW_HEIGHT 26
 
 #define DEVICE_WIDTH 18
 #define DEVICE_HEIGHT 21
-#define DEVICE_X 5
-#define DEVICE_Y 5
+#define DEVICE_X 13
+#define DEVICE_Y 3
 
 #define SCREEN_WIDTH 18
 #define SCREEN_HEIGHT 4
@@ -145,6 +145,14 @@ void set_cursor_position(unsigned x,unsigned y){
     pthread_mutex_unlock(&displayMutex);
 }
 
+inline unsigned get_cursor_x(){
+    return xscreen;
+}
+
+inline unsigned get_cursor_y(){
+    return yscreen;
+}
+
 void print(char* buffer){
     char c;
 
@@ -178,7 +186,7 @@ void printxy(unsigned x,unsigned y,char* buffer){
 }
 
 void init_hal(){
-    SET_TERMINAL_DIMENSION(SCREEN_WIDTH,SCREEN_HEIGHT);
+    SET_TERMINAL_DIMENSION(WINDOW_WIDTH,WINDOW_HEIGHT);
     CLEAR_SCREEN();
     system("stty raw -echo");
     fill_rect(DEVICE,LIGHT_VIOLET);

@@ -10,6 +10,10 @@ void end_hal();
 
 void set_cursor_position(unsigned x,unsigned y);
 
+unsigned get_cursor_x();
+
+inline unsigned get_cursor_y();
+
 void print(char* buffer);
 
 void printxy(unsigned x,unsigned y,char* buffer);
