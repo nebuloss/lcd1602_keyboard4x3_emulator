@@ -145,11 +145,11 @@ void set_cursor_position(unsigned x,unsigned y){
     pthread_mutex_unlock(&displayMutex);
 }
 
-inline unsigned get_cursor_x(){
+unsigned get_cursor_x(){
     return xscreen;
 }
 
-inline unsigned get_cursor_y(){
+unsigned get_cursor_y(){
     return yscreen;
 }
 
