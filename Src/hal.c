@@ -218,7 +218,9 @@ char get_button(){
     c = getchar();
     fcntl (STDIN_FILENO, F_SETFL, attrib);
 
-    stdin->_IO_read_ptr=stdin->_IO_read_end;
+    #ifdef __gnu_linux__
+    stdin->_IO_read_ptr=stdin->_IO_read_end; //flush stdin
+    #endif
     
     key=false;
 
