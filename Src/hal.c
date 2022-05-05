@@ -72,6 +72,7 @@ static const uint32_t clock_per_milisecond=CLOCKS_PER_SEC/1000;
 pthread_t keyboardThread;
 pthread_mutex_t keyboardMutex=PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t displayMutex=PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t quitMutex=PTHREAD_MUTEX_INITIALIZER;
 
 static void fill_rect(rect r,color c){ //permet de remplir une zone d'une certaine couleur
     SET_BACKGROUND(c); //on règle la couleur du curseur
@@ -113,7 +114,8 @@ static void display_keyboard(bool* status){
 
 static void* display_loop(void* arg){
     bool statuscopy[12];
-    while (1){
+    while (!pthread_mutex_trylock(&quitMutex)){
+        pthread_mutex_unlock(&quitMutex);
         
         pthread_mutex_lock(&keyboardMutex);
         for (int j=0;j<12;j++){
@@ -197,7 +199,9 @@ void init_hal(){
 }
 
 void end_hal(){
-    pthread_cancel(keyboardThread);
+    pthread_mutex_lock(&quitMutex);
+    pthread_join(keyboardThread,NULL);
+    pthread_mutex_unlock(&quitMutex);
     GOTOXY(1,1);
     system("stty cooked echo");
     RESET_COLOR();
