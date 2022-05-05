@@ -1,16 +1,10 @@
 #include "hal.h"
+#include "os/os_io.h"
 #include <stdio.h>
 
 void os_start(){
-    char c,buffer[16];
-    start_chrono();
-    while ((c=get_button())!='*'){
-        msleep(1);
-        if (!c) continue;
-        snprintf(buffer,16,"%d  ",c);
-        printxy(0,1,buffer);
-        snprintf(buffer,16,"%d",stop_chrono());
-        printxy(0,0,buffer);
+    os_printf("bienvenue %d\ntest",12);
+    for (int i=0;i<10;i++) os_wait_event();
         
-    }
+    
 }

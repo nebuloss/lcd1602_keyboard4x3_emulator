@@ -87,8 +87,6 @@ static void display_button(rect r,char c,color fg,color bg){ //affichage d'un no
     fill_rect(r,bg);
     SET_FOREGROUND(fg);
     PRINTXY(r,(r.width>>1),(r.height>>1),"%c",c);
-    GOTOXY(SCREEN.xo+xscreen,SCREEN_BORDER.yo+yscreen);
-    putchar('\n');
 }
 
 static void display_screen(){
@@ -129,7 +127,9 @@ static void* display_loop(void* arg){
         pthread_mutex_lock(&displayMutex);
         HIDE_CURSOR();
         display_keyboard(statuscopy);
-        GOTOXY(SCREEN.xo+xscreen,SCREEN.yo+yscreen);
+        GOTOXY(SCREEN.xo+xscreen,SCREEN_BORDER.yo+yscreen);
+        putchar('\n');
+        SET_COLOR(WHITE,BLUE);
         SHOW_CURSOR();
 
         pthread_mutex_unlock(&displayMutex);
@@ -139,11 +139,17 @@ static void* display_loop(void* arg){
     return NULL;
 }
 
-void set_cursor_position(unsigned x,unsigned y){
-    pthread_mutex_lock(&displayMutex);
+static void set_cursor_position_nolock(unsigned x,unsigned y){
     xscreen=x;
     yscreen=y;
     GOTOXY(SCREEN.xo+xscreen,SCREEN.yo+yscreen);
+}
+
+void set_cursor_position(unsigned x,unsigned y){
+    if (x>=16) x=16;
+    if (y) y=1;
+    pthread_mutex_lock(&displayMutex); 
+    set_cursor_position_nolock(x,y);
     pthread_mutex_unlock(&displayMutex);
 }
 
@@ -155,31 +161,26 @@ unsigned get_cursor_y(){
     return yscreen;
 }
 
-void print(char* buffer){
-    char c;
 
+void printchar(char c){
     pthread_mutex_lock(&displayMutex);
-    SET_COLOR(WHITE,BLUE);
-    while ((c=*buffer++)){
-        
+    if (c!='\n' && c!='\r'){
         putchar(c);
         xscreen++;
         
         if (xscreen>=16){
-            if (yscreen){
-                xscreen=15;
-                yscreen=1;
-                GOTOXY(SCREEN.xo+xscreen,SCREEN.yo+yscreen);
-                pthread_mutex_unlock(&displayMutex);
-                return;
-            }else{
-                xscreen=0;
-                yscreen=1;
-                GOTOXY(SCREEN.xo,SCREEN.yo+yscreen);
-            }
+            if (yscreen) set_cursor_position_nolock(15,1);
+            else set_cursor_position_nolock(0,1);
         }
     }
+    else set_cursor_position_nolock(0,1);
     pthread_mutex_unlock(&displayMutex);
+}
+
+void print(char* buffer){
+    char c;
+ 
+    while ((c=*buffer++)) printchar(c);
 }
 
 void printxy(unsigned x,unsigned y,char* buffer){
@@ -193,7 +194,7 @@ void init_hal(){
     system("stty raw -echo");
     fill_rect(DEVICE,LIGHT_VIOLET);
     display_screen();
-    
+    set_cursor_position_nolock(0,0);
     pthread_create(&keyboardThread,NULL,display_loop,NULL);
     
 }

@@ -14,6 +14,9 @@ unsigned get_cursor_x();
 
 unsigned get_cursor_y();
 
+//new function
+void printchar(char c);
+
 void print(char* buffer);
 
 void printxy(unsigned x,unsigned y,char* buffer);
