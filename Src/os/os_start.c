@@ -3,11 +3,17 @@
 #include <stdio.h>
 
 void os_start(){
+    char buffer[16];
+    char* test="123";
     os_init();
-    for (int i=0;i<40;i++) os_getchar();
+    os_reset_log();
+    os_puts(test);
+    os_wait_event();
     os_set_cursor_position(0,1);
-    os_clear();
-    os_putchar('#');
-    while (os_getkey()!='*') os_sleep(1);  
+    os_set_input_mode(os_alpha_input_mode);
+    os_read(buffer,10);
+    os_set_cursor_position(0,0);
+    os_puts(buffer);
+    os_wait_event();
     os_end();
 }

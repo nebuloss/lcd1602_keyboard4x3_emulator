@@ -13,4 +13,8 @@ void os_set_input_mode(int (*input_mode)());
 
 int os_simple_input_mode();
 
+char* os_read(char* buffer,unsigned lenght);
+
+int os_alpha_input_mode();
+
 #endif /* BE6F0CD6_1743_4A93_B3A3_D9482521D5FF */

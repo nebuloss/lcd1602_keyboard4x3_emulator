@@ -5,6 +5,9 @@
 #include <unistd.h>
 
 static int (*os_current_input_mode)()=os_simple_input_mode;
+static const char* os_alpha_mode_characters[12]={
+    "&'(1","ABC2","DEF3","GHI4","JKL5","MNO6","PQRS7","TUV8","WXYZ9","*"," 0","#"
+};
 
 void os_puts(char* buffer){
     for (char c;(c=*buffer);buffer++) os_putchar(c);
@@ -40,48 +43,88 @@ void os_set_input_mode(int (*input_mode)()){
 
 
 char* os_read(char* buffer,unsigned lenght){
-    unsigned x=os_get_cursor_x(),y=os_get_cursor_y();
-    unsigned l=32-(y<<4)-x;
-    unsigned n=0;
+    unsigned x,y;
+    unsigned n,l;
     int i;
     char data[128];
-    while ((i=os_current_input_mode())){
+
+    if (!buffer || !(l=31-((y=os_get_cursor_y())<<4)-(x=os_get_cursor_x()))) return NULL;
+
+    n=0;
+    lenght--;
+
+    while ((i=os_current_input_mode())!=0){
         if (i==-1){
-            if (n>0){
-                n--;
-                if (n>l){
-                    os_set_cursor_position(x,y);
-                    for (int j=n-l;j<n;j++) os_putchar(data[j]);
-                    os_set_cursor_position(15,1);
-                }else{
-                    
-                }
-            }
-            else continue;
+            if (!n) continue;
+            n--;
+            if (n<l){
+                os_move_cursor_left();
+                os_putchar(' ');
+                os_move_cursor_left();
+            }else{
+                os_set_cursor_position(x,y);
+                for (int j=n-l;j<n;j++) os_putchar(data[j]);
+                os_set_cursor_position(15,1);
+            } 
         }else{
-            if (n<128){
-                data[n]=i;
-                n++;
-                if (n>l){
-                    os_set_cursor_position(x,y);
-                    for (int j=n-l;j<n;j++) os_putchar(data[j]);
-                    os_set_cursor_position(15,1);
-                }else{
-                    os_putchar(i);
-                }
+            if (n==128) continue;
+            data[n]=i;
+            n++;
+            if (n>l){
+                os_set_cursor_position(x,y);
+                for (int j=n-l;j<n;j++) os_putchar(data[j]);
+                os_set_cursor_position(15,1);
+                os_putchar(' ');
             }
-            else continue; 
+            else os_putchar(i);
         }
-        
     }
-    return NULL;
+    if (!n) return NULL;
+    if (n>lenght) n=lenght;
+    buffer[n]='\0';
+    for (char *start=data,*end=start+n;start<end;start++,buffer++) *buffer=*start;
+    return buffer;
 
 }
 
 int os_simple_input_mode(){
     char c=os_wait_event();
+    
     os_sleep(100); //minimal time between keypress: does not support long keypress
+    //os_log("pressed %c -> %d",c,c);
     if (c=='*') return -1;
     if (c=='#') return 0;
+
     return c;
+}
+
+int os_alpha_input_mode(){
+    int c1,c2,n=0;
+    char c;
+
+    while ((c1=os_getkeynum())==-1) os_sleep(1);
+    c=os_alpha_mode_characters[c1][0];
+    os_log("c1=%d c=%c",c1,c);
+    os_sleep(100);
+    if (c=='*') return -1;
+    if (c=='#') return 0;
+
+    os_static_putchar(c);
+
+    while(1){
+        
+        if ((c2=os_getkeynum_timeout(500))==-1 || c2!=c1){
+            //os_log("c1=%d c2=%d",c1,c2);
+            os_putkeynum(c2);
+            break;
+        }
+        n++;
+        if (!(c=os_alpha_mode_characters[c1][n])) n=c;
+        c=os_alpha_mode_characters[c1][n];
+        os_static_putchar(c);
+        os_sleep(100);
+    };
+    
+    return c;
+    
 }

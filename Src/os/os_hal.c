@@ -3,12 +3,17 @@
 #include <time.h>
 #include <stdbool.h>
 
-static int os_hal_xscreen,os_hal_yscreen;
-static clock_t os_hal_timer;
-
 #ifdef LCD1602_KEYBOARD4x3_EMULATOR
+#include <stdio.h>
+#include <stdarg.h>
 static const unsigned os_hal_tick=CLOCKS_PER_SEC/1000;
+static const char* logfile="os.log";
 #endif
+
+static unsigned os_hal_xscreen,os_hal_yscreen;
+static clock_t os_hal_timer;
+static const char* os_hal_character_list="123456789*0#";
+static int os_hal_buffer_keynum=-1;
 
 static void _os_set_cursor_position(unsigned x,unsigned y){
     os_hal_xscreen=x;
@@ -68,6 +73,11 @@ void os_putchar(char c){
     else _os_set_cursor_position(0,1);
 }
 
+void os_static_putchar(char c){
+    hal_putchar(c);
+    hal_set_cursor_position(os_hal_xscreen,os_hal_yscreen);
+}
+
 void os_start_chrono(){
     os_hal_timer=clock();
 }
@@ -81,12 +91,86 @@ long os_stop_chrono(){
     #endif
 }
 
+int os_reset_log(){
+    #ifdef LCD1602_KEYBOARD4x3_EMULATOR
+    return fclose(fopen(logfile,"w"));
+    #else
+    return -1;
+    #endif
+}
+
+int os_log(char* format,...){
+    #ifdef LCD1602_KEYBOARD4x3_EMULATOR
+    time_t t;
+    struct tm *now;
+    va_list va;
+    FILE* f;
+
+    if ((f=fopen(logfile,"a"))){
+        t=time(&t); //on récupère l'heure
+        now=localtime(&t);
+        fprintf(f,"%4d-%02d-%02d %02d:%02d:%02d> ",now->tm_year+1900,now->tm_mon+1,now->tm_mday,now->tm_hour,now->tm_min,now->tm_sec);
+        va_start(va,format); //utilisation des va_args pour gérer les arguments à nombres variables
+        vfprintf(f,format,va);
+        va_end(va); //libération des ressources des va_args
+        putc('\n',f); //retour à la ligne
+        fclose(f);
+        return 0;
+    }
+    
+    #endif
+    return -1;
+    
+}
+
+char os_getkey_from_num(int num){
+    if (num==-1) return 0;
+    return os_hal_character_list[num];
+}
+
+int os_getkeynum_from_key(char c){
+    for (int i=0;i<12;i++) if (os_hal_character_list[i]==c) return i;
+    return -1;
+}
+
+char os_getkey(){
+    return os_getkey_from_num(os_getkeynum());
+}
+
+void os_putkeynum(int num){
+    os_hal_buffer_keynum=num;
+}
+
+
+int os_getkeynum(){
+    int key;
+    if ((key=os_hal_buffer_keynum)==-1) return hal_getkeynum();
+    os_hal_buffer_keynum=-1;
+    return key;
+}
+
+int os_getkeynum_timeout(long timeout){
+    int key;
+
+    if ((key=os_hal_buffer_keynum)!=-1){
+        os_hal_buffer_keynum=-1;
+        return key;
+    }
+    os_start_chrono();
+    do{
+        key=hal_getkeynum();
+    }while(key==-1 && os_stop_chrono()<timeout);
+    return key;
+}
+
+char os_getkey_timeout(long timeout){
+    return os_getkey_from_num(os_getkeynum_timeout(timeout));
+}
+
 void (*os_sleep)(unsigned)=hal_sleep;
 
 void (*os_init)(void)=hal_init;
 
 void (*os_end)(void)=hal_end;
-
-char (*os_getkey)(void)=hal_getkey;
 
 void (*os_clear)(void)=hal_clear;

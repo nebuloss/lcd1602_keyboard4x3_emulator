@@ -139,10 +139,9 @@ void hal_putchar(char c){
     pthread_mutex_unlock(&displayMutex);
 }
 
-char hal_getkey(){
-    int attrib;  
+int hal_getkeynum(){
+    int attrib,i;  
     char c;
-    bool key;
     
     attrib = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl (STDIN_FILENO, F_SETFL, attrib | O_NONBLOCK);
@@ -152,21 +151,20 @@ char hal_getkey(){
     #ifdef __gnu_linux__
     stdin->_IO_read_ptr=stdin->_IO_read_end; //flush stdin
     #endif
-    
-    key=false;
 
+    if (c==-1) return c;
     pthread_mutex_lock(&keyboardMutex);
-    for (int i=0;i<12;i++){
+    for (i=0;i<12;i++){
         if (c==clist[i]){
             statuslist[i]=true;
-            key=true;
+            break;
         }
     }
     pthread_mutex_unlock(&keyboardMutex);
     
-    if (!key) return 0;
+    if (i==12) return -1;
 
-    return c;
+    return i;
 }
 
 void hal_set_cursor_position(unsigned x,unsigned y){
@@ -184,6 +182,7 @@ void hal_init(){
     fill_rect(DEVICE,LIGHT_VIOLET);
     display_screen();
     hal_set_cursor_position(0,0);
+    SET_FOREGROUND(WHITE);
     pthread_create(&keyboardThread,NULL,display_loop,NULL);
 }
 
