@@ -6,7 +6,7 @@ uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
 
 
 # Compile / Link Flags
-CFLAGS = -c -Wall -std=c99 -Wno-unused-result -O3
+CFLAGS = -c -Wall -std=c99 -Wno-unused-result -g
 
 
 #CC= x86_64-w64-mingw32-gcc

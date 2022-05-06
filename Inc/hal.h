@@ -1,32 +1,17 @@
 #ifndef FF55E453_3B0C_4574_A40C_0F8E9E23D065
 #define FF55E453_3B0C_4574_A40C_0F8E9E23D065
+#define LCD1602_KEYBOARD4x3_EMULATOR //for specific functions targetting emulator such as logging.
 
-#include <stdio.h>
+void hal_putchar(char c);
 
+char hal_getkey();
 
-void init_hal();
+void hal_set_cursor_position(unsigned x,unsigned y);
 
-void end_hal();
+void hal_init();
 
-void set_cursor_position(unsigned x,unsigned y);
+void hal_end();
 
-unsigned get_cursor_x();
-
-unsigned get_cursor_y();
-
-//new function
-void printchar(char c);
-
-void print(char* buffer);
-
-void printxy(unsigned x,unsigned y,char* buffer);
-
-char get_button();
-
-void start_chrono();
-
-unsigned stop_chrono();
-
-void msleep(unsigned ms);
+void hal_sleep(unsigned ms);
 
 #endif /* FF55E453_3B0C_4574_A40C_0F8E9E23D065 */

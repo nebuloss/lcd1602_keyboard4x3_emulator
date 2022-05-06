@@ -1,9 +1,8 @@
 #include "hal.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <time.h>
 #include <stdint.h>
 #include <pthread.h>
 #include <stdbool.h>
@@ -65,9 +64,7 @@ typedef struct rect{ //definition d'une structure permettant de stocker un recta
 
 static char* clist="123456789*0#";
 static bool statuslist[12];
-static unsigned xscreen,yscreen;
-static clock_t hal_timer;
-static const uint32_t clock_per_milisecond=CLOCKS_PER_SEC/1000; 
+static int xscreen,yscreen;
 
 pthread_t keyboardThread;
 pthread_mutex_t keyboardMutex=PTHREAD_MUTEX_INITIALIZER;
@@ -93,8 +90,6 @@ static void display_screen(){
     fill_rect(SCREEN_BORDER,BROWN);
     fill_rect(SCREEN,BLUE);
 }
-
-
 
 static void display_keyboard(bool* status){
     rect r;
@@ -128,88 +123,25 @@ static void* display_loop(void* arg){
         HIDE_CURSOR();
         display_keyboard(statuscopy);
         GOTOXY(SCREEN.xo+xscreen,SCREEN_BORDER.yo+yscreen);
-        putchar('\n');
+        putchar('\n'); //refresh
         SET_COLOR(WHITE,BLUE);
         SHOW_CURSOR();
 
         pthread_mutex_unlock(&displayMutex);
 
-        msleep(100);
+        hal_sleep(100);
     }
     return NULL;
 }
 
-static void set_cursor_position_nolock(unsigned x,unsigned y){
-    xscreen=x;
-    yscreen=y;
-    GOTOXY(SCREEN.xo+xscreen,SCREEN.yo+yscreen);
-}
-
-void set_cursor_position(unsigned x,unsigned y){
-    if (x>=16) x=16;
-    if (y) y=1;
-    pthread_mutex_lock(&displayMutex); 
-    set_cursor_position_nolock(x,y);
-    pthread_mutex_unlock(&displayMutex);
-}
-
-unsigned get_cursor_x(){
-    return xscreen;
-}
-
-unsigned get_cursor_y(){
-    return yscreen;
-}
-
-
-void printchar(char c){
+void hal_putchar(char c){
     pthread_mutex_lock(&displayMutex);
-    if (c!='\n' && c!='\r'){
-        putchar(c);
-        xscreen++;
-        
-        if (xscreen>=16){
-            if (yscreen) set_cursor_position_nolock(15,1);
-            else set_cursor_position_nolock(0,1);
-        }
-    }
-    else set_cursor_position_nolock(0,1);
+    putchar(c);
+    xscreen++;
     pthread_mutex_unlock(&displayMutex);
 }
 
-void print(char* buffer){
-    char c;
- 
-    while ((c=*buffer++)) printchar(c);
-}
-
-void printxy(unsigned x,unsigned y,char* buffer){
-    set_cursor_position(x,y);
-    print(buffer);
-}
-
-void init_hal(){
-    SET_TERMINAL_DIMENSION(WINDOW_WIDTH,WINDOW_HEIGHT);
-    CLEAR_SCREEN();
-    system("stty raw -echo");
-    fill_rect(DEVICE,LIGHT_VIOLET);
-    display_screen();
-    set_cursor_position_nolock(0,0);
-    pthread_create(&keyboardThread,NULL,display_loop,NULL);
-    
-}
-
-void end_hal(){
-    pthread_mutex_lock(&quitMutex);
-    pthread_join(keyboardThread,NULL);
-    pthread_mutex_unlock(&quitMutex);
-    GOTOXY(1,1);
-    system("stty cooked echo");
-    RESET_COLOR();
-    CLEAR_SCREEN();
-}
-
-char get_button(){
+char hal_getkey(){
     int attrib;  
     char c;
     bool key;
@@ -236,19 +168,37 @@ char get_button(){
     
     if (!key) return 0;
 
-
     return c;
 }
 
-void start_chrono(){
-    hal_timer=clock();
+void hal_set_cursor_position(unsigned x,unsigned y){
+    pthread_mutex_lock(&displayMutex);
+    xscreen=x;
+    yscreen=y;
+    GOTOXY(SCREEN.xo+xscreen,SCREEN.yo+yscreen);
+    pthread_mutex_unlock(&displayMutex);
 }
 
-unsigned stop_chrono(){
-    return (clock()-hal_timer)/clock_per_milisecond;
+void hal_init(){
+    SET_TERMINAL_DIMENSION(WINDOW_WIDTH,WINDOW_HEIGHT);
+    CLEAR_SCREEN();
+    system("stty raw -echo");
+    fill_rect(DEVICE,LIGHT_VIOLET);
+    display_screen();
+    hal_set_cursor_position(0,0);
+    pthread_create(&keyboardThread,NULL,display_loop,NULL);
 }
 
-void msleep(unsigned ms){
+void hal_end(){
+    pthread_mutex_lock(&quitMutex);
+    pthread_join(keyboardThread,NULL);
+    pthread_mutex_unlock(&quitMutex);
+    GOTOXY(1,1);
+    system("stty cooked echo");
+    RESET_COLOR();
+    CLEAR_SCREEN();
+}
+
+void hal_sleep(unsigned ms){
     usleep(ms*1000);
 }
-
