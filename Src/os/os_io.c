@@ -1,7 +1,6 @@
 #include "os/os_hal.h"
 #include "os/os_io.h"
 #include <stdio.h>
-#include <stdarg.h>
 #include <unistd.h>
 
 static int (*os_current_input_mode)()=os_simple_input_mode;
@@ -13,20 +12,43 @@ void os_puts(char* buffer){
     for (char c;(c=*buffer);buffer++) os_putchar(c);
 }
 
+void os_puts_at(unsigned x,unsigned y,char* buffer){
+    os_set_cursor_position(x,y);
+    os_puts(buffer);
+}
+
 char os_wait_event(){
     char c;
     while (!(c=os_getkey())) os_sleep(1);
     return c;
 }
 
+int os_vprintf(char* restrict format,va_list va){
+    char buffer[33];
+    int value;
+
+    value=vsnprintf(buffer,33,format,va);
+    os_puts(buffer);
+    return value;
+}
+
 int os_printf(char* restrict format,...){
     va_list va;
     int value;
-    char buffer[33];
-
+    
     va_start(va,format);
-    value=vsnprintf(buffer,33,format,va);
-    os_puts(buffer);
+    value=os_vprintf(format,va);
+    va_end(va);
+    return value;
+}
+
+int os_printf_at(unsigned x,unsigned y,char* restrict format,...){
+    va_list va;
+    int value;
+    
+    va_start(va,format);
+    os_set_cursor_position(x,y);
+    value=os_vprintf(format,va);
     va_end(va);
     return value;
 }
@@ -46,7 +68,7 @@ char* os_read(char* buffer,unsigned lenght){
     unsigned x,y;
     unsigned n,l;
     int i;
-    char data[128];
+    char data[256];
 
     if (!buffer || !(l=31-((y=os_get_cursor_y())<<4)-(x=os_get_cursor_x()))) return NULL;
 
@@ -67,7 +89,7 @@ char* os_read(char* buffer,unsigned lenght){
                 os_set_cursor_position(15,1);
             } 
         }else{
-            if (n==128) continue;
+            if (n==256) continue;
             data[n]=i;
             n++;
             if (n>l){
