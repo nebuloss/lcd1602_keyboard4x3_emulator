@@ -1,17 +1,18 @@
 #include "os/os_hal.h"
 #include "hal.h"
 #include <time.h>
+#include <sys/time.h>
 #include <stdbool.h>
+
+static struct timeval os_hal_tval_before, os_hal_tval_after, os_hal_tval_result;
 
 #ifdef LCD1602_KEYBOARD4x3_EMULATOR
 #include <stdio.h>
 #include <stdarg.h>
-static const unsigned os_hal_tick=CLOCKS_PER_SEC/1000;
 static const char* logfile="os.log";
 #endif
 
 static unsigned os_hal_xscreen,os_hal_yscreen;
-static clock_t os_hal_timer;
 static const char* os_hal_character_list="123456789*0#";
 static int os_hal_buffer_keynum=-1;
 
@@ -79,16 +80,19 @@ void os_static_putchar(char c){
 }
 
 void os_start_chrono(){
-    os_hal_timer=clock();
+    gettimeofday(&os_hal_tval_before, NULL);
 }
 
 long os_stop_chrono(){
-    long diff=clock()-os_hal_timer;
-    #ifdef LCD1602_KEYBOARD4x3_EMULATOR
-    return diff/os_hal_tick;
-    #else
-    return diff;
-    #endif
+    gettimeofday(&os_hal_tval_after, NULL);
+    os_hal_tval_result.tv_sec = os_hal_tval_after.tv_sec - os_hal_tval_before.tv_sec;
+    os_hal_tval_result.tv_usec = os_hal_tval_after.tv_usec - os_hal_tval_before.tv_usec;
+    if (os_hal_tval_result.tv_usec < 0) { 
+        os_hal_tval_result.tv_sec--; 
+        os_hal_tval_result.tv_usec += 1000000;
+    }
+
+    return (os_hal_tval_result.tv_usec/1000)+os_hal_tval_result.tv_sec*1000;
 }
 
 int os_reset_log(){
