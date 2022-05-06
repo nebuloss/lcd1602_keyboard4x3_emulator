@@ -29,7 +29,9 @@ int os_printf(char* restrict format,...){
 }
 
 char os_getchar(){
-    os_putchar(os_wait_event());
+    char c;
+    os_putchar((c=os_wait_event()));
+    return c;
 }
 
 void os_set_input_mode(int (*input_mode)()){

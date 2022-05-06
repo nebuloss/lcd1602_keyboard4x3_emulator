@@ -7,8 +7,6 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-
-
 #define PUTPIXEL(r,g,b) printf("\e[48;2;%hhu;%hhu;%hhum  ",r,g,b) //permet d'afficher un pixel (pour l'affichage des bitmaps)
 #define RESET_COLOR() printf("\e[0m")
 #define SET_FOREGROUND(fg) printf("\e[38;2;%hhu;%hhu;%hhum",fg.r,fg.g,fg.b)
@@ -201,4 +199,11 @@ void hal_end(){
 
 void hal_sleep(unsigned ms){
     usleep(ms*1000);
+}
+
+void hal_clear(){
+    pthread_mutex_lock(&displayMutex);
+    fill_rect(SCREEN,BLUE);
+    GOTOXY(SCREEN.xo+xscreen,SCREEN.yo+yscreen);
+    pthread_mutex_unlock(&displayMutex);
 }

@@ -19,10 +19,12 @@ long os_stop_chrono();
 
 extern void (*os_sleep)(unsigned ms);
 
-extern void (*os_init)();
+extern void (*os_init)(void);
 
-extern void (*os_end)();
+extern void (*os_end)(void);
 
-extern char (*os_getkey)();
+extern char (*os_getkey)(void);
+
+extern void (*os_clear)(void);
 
 #endif /* D2D40D82_A2DF_412E_BBF8_F26F752DA902 */

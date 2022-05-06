@@ -14,4 +14,6 @@ void hal_end();
 
 void hal_sleep(unsigned ms);
 
+void hal_clear();
+
 #endif /* FF55E453_3B0C_4574_A40C_0F8E9E23D065 */
