@@ -163,6 +163,7 @@ int os_getkeynum_timeout(long timeout){
     os_start_chrono();
     do{
         key=hal_getkeynum();
+        os_sleep(1);
     }while(key==-1 && os_stop_chrono()<timeout);
     return key;
 }
