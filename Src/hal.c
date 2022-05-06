@@ -49,8 +49,8 @@ typedef struct rect{ //definition d'une structure permettant de stocker un recta
 
 #define DEVICE_WIDTH 18
 #define DEVICE_HEIGHT 21
-#define DEVICE_X 13
-#define DEVICE_Y 3
+#define DEVICE_X 1
+#define DEVICE_Y 1
 
 #define SCREEN_WIDTH 18
 #define SCREEN_HEIGHT 4
@@ -141,7 +141,7 @@ void hal_putchar(char c){
 
 int hal_getkeynum(){
     int attrib,i;  
-    char c;
+    int c;
     
     attrib = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl (STDIN_FILENO, F_SETFL, attrib | O_NONBLOCK);
