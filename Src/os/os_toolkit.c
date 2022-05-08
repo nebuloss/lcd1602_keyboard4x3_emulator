@@ -16,6 +16,7 @@ int os_menu(char* title,int n,char* entry[n]){
     selection=0;
 
     while (1){
+        
         os_printf_at(0,1,"< %12.12s >",entry[selection]);
         c=os_wait_event();
         if (c=='*'){
@@ -33,7 +34,13 @@ int os_menu(char* title,int n,char* entry[n]){
 }
 
 char* os_strncpy(char* dst,char* src,unsigned lenght){
-    if (!dst || !src) return NULL;
-    for (int i=0;i<lenght && (*dst=*src);dst++,src++,i++);
+    if (!dst || !src || !lenght) return NULL;
+    for (int i=0;(*dst=*src);dst++,src++){
+        if (++i>=lenght){
+            *dst='\0';
+            break;
+        }
+    }
+    
     return dst;
 }

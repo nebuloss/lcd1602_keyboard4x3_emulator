@@ -124,7 +124,6 @@ int os_alpha_input_mode(){
 
     while ((c1=os_getkeynum())==-1) os_sleep(1);
     c=os_alpha_mode_characters[c1][0];
-    os_log("c1=%d c=%c",c1,c);
     os_sleep(100);
     if (c=='*') return -1;
     if (c=='#') return 0;
