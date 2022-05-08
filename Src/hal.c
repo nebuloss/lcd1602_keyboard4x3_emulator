@@ -55,6 +55,8 @@ typedef struct rect{ //definition d'une structure permettant de stocker un recta
 #define SCREEN_WIDTH 18
 #define SCREEN_HEIGHT 4
 
+#define SHUTDOWN_KEY 3
+
 #define DEVICE (rect){DEVICE_X,DEVICE_Y,DEVICE_WIDTH,DEVICE_HEIGHT}
 #define SCREEN_BORDER (rect){DEVICE_X,DEVICE_Y,SCREEN_WIDTH,4}
 #define SCREEN (rect){DEVICE_X+1,DEVICE_Y+1,SCREEN_WIDTH-2,2}
@@ -152,6 +154,10 @@ int hal_getkeynum(){
     stdin->_IO_read_ptr=stdin->_IO_read_end; //flush stdin
     #endif
 
+    if (c==SHUTDOWN_KEY){
+        hal_end();
+        exit(EXIT_SUCCESS);
+    }
     if (c==-1) return c;
     pthread_mutex_lock(&keyboardMutex);
     for (i=0;i<12;i++){
@@ -203,6 +209,17 @@ void hal_sleep(unsigned ms){
 void hal_clear(){
     pthread_mutex_lock(&displayMutex);
     fill_rect(SCREEN,BLUE);
-    GOTOXY(SCREEN.xo+xscreen,SCREEN.yo+yscreen);
+    xscreen=yscreen=0;
+    GOTOXY(SCREEN.xo,SCREEN.yo);
     pthread_mutex_unlock(&displayMutex);
+}
+
+int hal_phone_sms(char* phone_number,char* message){
+    hal_sleep(1000);
+    return 0;
+}
+
+int hal_phone_call(char* phone_number){
+    hal_sleep(2000);
+    return 0;
 }

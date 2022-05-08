@@ -24,6 +24,14 @@ char* os_read(char* buffer,unsigned lenght);
 
 int os_alpha_input_mode();
 
+void os_vpopup(char* title,char* message,va_list va);
 
+void os_popup(char* title,char* message,...);
+
+void os_error(char* message,...);
+
+void os_info(char* message,...);
+
+char* os_input(char* title,int (*input_mode)(void),char* buffer,int lenght);
 
 #endif /* BE6F0CD6_1743_4A93_B3A3_D9482521D5FF */

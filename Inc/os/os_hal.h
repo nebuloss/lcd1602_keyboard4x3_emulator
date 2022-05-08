@@ -1,6 +1,8 @@
 #ifndef D2D40D82_A2DF_412E_BBF8_F26F752DA902
 #define D2D40D82_A2DF_412E_BBF8_F26F752DA902
 
+#include <stddef.h>
+
 void os_set_cursor_position(unsigned x,unsigned y);
 
 void os_move_cursor_right();
@@ -37,12 +39,16 @@ int os_log(char* format,...);
 
 int os_reset_log();
 
+void os_clear();
+
 extern void (*os_sleep)(unsigned ms);
 
 extern void (*os_init)(void);
 
 extern void (*os_end)(void);
 
-extern void (*os_clear)(void);
+extern int (*os_phone_sms)(char* phone_number,char* message);
+
+extern int (*os_phone_call)(char* phone_number);
 
 #endif /* D2D40D82_A2DF_412E_BBF8_F26F752DA902 */

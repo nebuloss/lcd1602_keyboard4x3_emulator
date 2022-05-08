@@ -68,7 +68,6 @@ char* os_read(char* buffer,unsigned lenght){
     unsigned x,y;
     unsigned n,l;
     int i;
-    char data[256];
 
     if (!buffer || !(l=31-((y=os_get_cursor_y())<<4)-(x=os_get_cursor_x()))) return NULL;
 
@@ -85,16 +84,16 @@ char* os_read(char* buffer,unsigned lenght){
                 os_move_cursor_left();
             }else{
                 os_set_cursor_position(x,y);
-                for (int j=n-l;j<n;j++) os_putchar(data[j]);
+                for (int j=n-l;j<n;j++) os_putchar(buffer[j]);
                 os_set_cursor_position(15,1);
             } 
         }else{
-            if (n==256) continue;
-            data[n]=i;
+            if (n==lenght) continue;
+            buffer[n]=i;
             n++;
             if (n>l){
                 os_set_cursor_position(x,y);
-                for (int j=n-l;j<n;j++) os_putchar(data[j]);
+                for (int j=n-l;j<n;j++) os_putchar(buffer[j]);
                 os_set_cursor_position(15,1);
                 os_putchar(' ');
             }
@@ -104,7 +103,6 @@ char* os_read(char* buffer,unsigned lenght){
     if (!n) return NULL;
     if (n>lenght) n=lenght;
     buffer[n]='\0';
-    for (char *start=data,*end=start+n;start<end;start++,buffer++) *buffer=*start;
     return buffer;
 
 }
@@ -149,4 +147,42 @@ int os_alpha_input_mode(){
     
     return c;
     
+}
+
+void os_vpopup(char* title,char* message,va_list va){
+    os_clear();
+    os_puts(title);
+    os_set_cursor_position(0,1);
+    os_vprintf(message,va);
+    os_wait_event();
+}
+
+void os_popup(char* title,char* message,...){
+    va_list va;
+    va_start(va,message);
+    os_vpopup(title,message,va);
+    va_end(va);
+    
+}
+
+void os_error(char* message,...){
+    va_list va;
+    va_start(va,message);
+    os_vpopup("Error:",message,va);
+    va_end(va);
+}
+
+void os_info(char* message,...){
+    va_list va;
+    va_start(va,message);
+    os_vpopup("Info:",message,va);
+    va_end(va);
+}
+
+char* os_input(char* title,int (*input_mode)(void),char* buffer,int lenght){
+    os_clear();
+    os_puts(title);
+    os_set_cursor_position(0,1);
+    os_set_input_mode(input_mode);
+    return os_read(buffer,lenght);
 }

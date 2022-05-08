@@ -16,4 +16,8 @@ void hal_sleep(unsigned ms);
 
 void hal_clear();
 
+int hal_phone_sms(char* phone_number,char* message);
+
+int hal_phone_call(char* phone_number);
+
 #endif /* FF55E453_3B0C_4574_A40C_0F8E9E23D065 */

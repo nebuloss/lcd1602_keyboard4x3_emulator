@@ -172,10 +172,17 @@ char os_getkey_timeout(long timeout){
     return os_getkey_from_num(os_getkeynum_timeout(timeout));
 }
 
+void os_clear(){
+    hal_clear();
+    os_hal_xscreen=os_hal_yscreen=0;
+}
+
 void (*os_sleep)(unsigned)=hal_sleep;
 
 void (*os_init)(void)=hal_init;
 
 void (*os_end)(void)=hal_end;
 
-void (*os_clear)(void)=hal_clear;
+int (*os_phone_sms)(char*,char*)=hal_phone_sms;
+
+int (*os_phone_call)(char*)=hal_phone_call;
