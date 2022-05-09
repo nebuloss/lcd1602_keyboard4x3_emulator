@@ -20,4 +20,6 @@ int hal_phone_sms(char* phone_number,char* message);
 
 int hal_phone_call(char* phone_number);
 
+void hal_phone_hang();
+
 #endif /* FF55E453_3B0C_4574_A40C_0F8E9E23D065 */

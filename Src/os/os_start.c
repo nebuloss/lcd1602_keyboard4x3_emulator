@@ -30,7 +30,7 @@ int os_phone_sms_graphic(char* phone_number,char* message){
     os_clear();
     os_puts("sending sms:\n->");
     os_puts_at(3,1,phone_number);
-    if ((status=os_phone_sms(phone_number,message))<0) os_error("sms not sent");
+    if ((status=os_phone_sms(message,phone_number))<0) os_error("sms not sent");
     return status;
 }
 
@@ -40,6 +40,8 @@ int os_phone_call_graphic(char* phone_number){
     os_puts("calling:\n->");
     os_puts_at(3,1,phone_number);
     if ((status=os_phone_call(phone_number))<0) os_error("fail to call");
+    os_wait_event();
+    os_phone_hang();
     return status;
 }
 

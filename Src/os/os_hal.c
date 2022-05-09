@@ -4,7 +4,6 @@
 #include <sys/time.h>
 #include <stdbool.h>
 
-static struct timeval os_hal_tval_before, os_hal_tval_after, os_hal_tval_result;
 
 #ifdef LCD1602_KEYBOARD4x3_EMULATOR
 #include <stdio.h>
@@ -79,22 +78,6 @@ void os_static_putchar(char c){
     hal_set_cursor_position(os_hal_xscreen,os_hal_yscreen);
 }
 
-void os_start_chrono(){
-    gettimeofday(&os_hal_tval_before, NULL);
-}
-
-long os_stop_chrono(){
-    gettimeofday(&os_hal_tval_after, NULL);
-    os_hal_tval_result.tv_sec = os_hal_tval_after.tv_sec - os_hal_tval_before.tv_sec;
-    os_hal_tval_result.tv_usec = os_hal_tval_after.tv_usec - os_hal_tval_before.tv_usec;
-    if (os_hal_tval_result.tv_usec < 0) { 
-        os_hal_tval_result.tv_sec--; 
-        os_hal_tval_result.tv_usec += 1000000;
-    }
-
-    return (os_hal_tval_result.tv_usec/1000)+os_hal_tval_result.tv_sec*1000;
-}
-
 int os_reset_log(){
     #ifdef LCD1602_KEYBOARD4x3_EMULATOR
     return fclose(fopen(logfile,"w"));
@@ -154,17 +137,17 @@ int os_getkeynum(){
 }
 
 int os_getkeynum_timeout(long timeout){
-    int key;
+    int key,i;
 
     if ((key=os_hal_buffer_keynum)!=-1){
         os_hal_buffer_keynum=-1;
         return key;
     }
-    os_start_chrono();
+    i=0;
     do{
         key=hal_getkeynum();
         os_sleep(1);
-    }while(key==-1 && os_stop_chrono()<timeout);
+    }while(key==-1 && i++<timeout);
     return key;
 }
 
@@ -186,3 +169,5 @@ void (*os_end)(void)=hal_end;
 int (*os_phone_sms)(char*,char*)=hal_phone_sms;
 
 int (*os_phone_call)(char*)=hal_phone_call;
+
+void (*os_phone_hang)(void)=hal_phone_hang;

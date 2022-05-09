@@ -29,7 +29,6 @@ int os_menu(char* title,int n,char* entry[n]){
         else if (c=='0') break;
         else return -1;
     }
-
     return selection;
 }
 

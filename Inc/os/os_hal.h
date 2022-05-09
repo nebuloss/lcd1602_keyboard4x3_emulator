@@ -17,10 +17,6 @@ void os_putchar(char c);
 
 void os_static_putchar(char c);
 
-void os_start_chrono();
-
-long os_stop_chrono();
-
 char os_getkey();
 
 char os_getkey_from_num(int num);
@@ -50,5 +46,7 @@ extern void (*os_end)(void);
 extern int (*os_phone_sms)(char* phone_number,char* message);
 
 extern int (*os_phone_call)(char* phone_number);
+
+extern void (*os_phone_hang)(void);
 
 #endif /* D2D40D82_A2DF_412E_BBF8_F26F752DA902 */

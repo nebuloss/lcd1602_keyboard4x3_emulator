@@ -20,6 +20,7 @@ void os_puts_at(unsigned x,unsigned y,char* buffer){
 char os_wait_event(){
     char c;
     while (!(c=os_getkey())) os_sleep(1);
+    os_sleep(100);
     return c;
 }
 
@@ -132,7 +133,8 @@ int os_alpha_input_mode(){
 
     while(1){
         
-        if ((c2=os_getkeynum_timeout(500))==-1 || c2!=c1){
+        if ((c2=os_getkeynum_timeout(400))==-1 || c2!=c1){
+        	os_sleep(100);
             //os_log("c1=%d c2=%d",c1,c2);
             os_putkeynum(c2);
             break;

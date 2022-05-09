@@ -223,3 +223,7 @@ int hal_phone_call(char* phone_number){
     hal_sleep(2000);
     return 0;
 }
+
+void hal_phone_hang(){
+    hal_sleep(100);
+}
