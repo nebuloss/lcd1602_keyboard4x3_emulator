@@ -89,7 +89,10 @@ char* os_read(char* buffer,unsigned lenght){
                 os_set_cursor_position(15,1);
             } 
         }else{
-            if (n==lenght) continue;
+            if (n==lenght){
+                os_static_putchar(' ');
+                continue;
+            }
             buffer[n]=i;
             n++;
             if (n>l){
